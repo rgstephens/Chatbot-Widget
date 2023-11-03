@@ -1,21 +1,22 @@
 body {
   font-family: "Open Sans", sans-serif;
-  background: url("../img/body.png") no-repeat center center fixed;
-  background-size: cover;
+  /* background: url("../img/body.png") no-repeat center center fixed;
+  background-size: cover; */
 }
 
 /* ============= css related to chats =============== */
 
 .widget {
-  display: none;
-  width: 350px;
-  right: 15px;
-  height: 500px;
-  bottom: 5%;
+  display: block; /* or 'flex' if you want a flex container */
+  width: 100vw;   /* 100% of the viewport width */
+  height: 100vh;  /* 100% of the viewport height */
   position: fixed;
+  top: 0;         /* Align to the top of the viewport */
+  left: 0;        /* Align to the left of the viewport */
   background: #fff;
-  border-radius: 10px 10px 10px 10px;
-  box-shadow: 0 0px 1px 0 rgba(0, 0, 0, 0.16), 0 0px 5px 0 #00000096;
+  margin: 0;      /* Remove margins if any */
+  border-radius: 0; /* Optional: remove if you want the widget to cover the whole screen without rounded corners */
+  box-shadow: none; /* Optional: remove or keep based on your design preference */
 }
 
 .chat_header {
@@ -34,14 +35,16 @@ body {
 }
 
 .chats {
-  /* display: none; */
   height: 385px;
   padding: 2px;
   border-radius: 1px;
+  box-sizing: border-box;
   overflow-y: scroll;
   margin-top: 1px;
   transition: 0.2s;
+  width: calc(100% + 1px);
 }
+
 
 div.chats::-webkit-scrollbar {
   overflow-y: hidden;

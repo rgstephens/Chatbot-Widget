@@ -2,6 +2,7 @@
  * scroll to the bottom of the chats after new message has been added to chat
  */
 const converter = new showdown.Converter();
+converter.setOption('tables', true);
 function scrollToBottomOfResults() {
   const terminalResultsDiv = document.getElementById("chats");
   terminalResultsDiv.scrollTop = terminalResultsDiv.scrollHeight;
@@ -83,7 +84,9 @@ function setBotResponse(response) {
             if (
               html.includes("<ul") ||
               html.includes("<ol") ||
+              html.includes("<td") ||
               html.includes("<li") ||
+              html.includes("<b") ||
               html.includes("<h3")
             ) {
               html = html.replaceAll("<br>", "");
