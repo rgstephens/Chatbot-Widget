@@ -32,6 +32,18 @@ function getBotResponse(text) {
   return botResponse;
 }
 
+function extractEntities(data) {
+  let newData = {};
+  for (let key in data) {
+    if (key.startsWith("entity_")) {
+      // Remove the 'entity_' prefix and create a new key in newData
+      let newKey = key.replace("entity_", "");
+      newData[newKey] = data[key];
+    }
+  }
+  return newData;
+}
+
 /**
  * renders bot response on to the chat screen
  * @param {Array} response json array containing different types of bot response
@@ -134,6 +146,175 @@ function setBotResponse(response) {
         // check if the response contains "custom" message
         if (Object.hasOwnProperty.call(response[i], "custom")) {
           const { payload } = response[i].custom;
+          if (payload === "adaptiveCard") {
+            const adaptiveCardData = response[i].custom.data;
+
+            // Create an AdaptiveCard instance
+            let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+            adaptiveCard.onExecuteAction = function (action) {
+              if (action instanceof AdaptiveCards.SubmitAction) {
+                let payloadValue = action.data.payload;
+                if (action.data.type == "button") {
+                  payloadValue = action.data.payload;
+                } else if (action.data.type == "form") {
+                  entities = extractEntities(action.data);
+                  payloadValue = `${action.data.payload}${JSON.stringify(entities)}`;
+                }
+                // Extract the payload value from the action data
+                // Call the send function with the payload
+                send(payloadValue);
+              }
+            };
+            var testCard = {
+              "type": "AdaptiveCard",
+              "version": "1.0",
+              "body": [
+                {
+                  "type": "Image",
+                  "url": "https://adaptivecards.io/content/adaptive-card-50.png"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "Hello **Adaptive Cards!**"
+                }
+              ],
+              "actions": [
+                {
+                  "type": "Action.OpenUrl",
+                  "title": "Learn more",
+                  "url": "https://adaptivecards.io"
+                },
+                {
+                  "type": "Action.Submit",
+                  "title": "Scorecard",
+                  "data": {
+                    "payload": "/show_scorecard"
+                  }
+                },
+                {
+                  "type": "Action.Submit",
+                  "title": "Goodbye",
+                  "data": {
+                    "payload": "/goodbye"
+                  }
+                }
+              ]
+            };
+            const simpleFormCard = {
+              "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+              "type": "AdaptiveCard",
+              "version": "1.5",
+              "body": [
+                {
+                  "type": "TextBlock",
+                  "size": "medium",
+                  "weight": "bolder",
+                  "text": " ${ApplicationInfo.title}",
+                  "horizontalAlignment": "center",
+                  "wrap": true,
+                  "style": "heading"
+                },
+                {
+                  "type": "Input.Text",
+                  "style": "text",
+                  "id": "entity_foursome_id",
+                  "label": "Foursome Id",
+                  "isRequired": true,
+                  "errorMessage": "Foursome id is required"
+                }
+              ],
+              "actions": [
+                {
+                  "type": "Action.Submit",
+                  "title": "Start Round",
+                  "data": {
+                    "type": "form",
+                    "payload": "/start_round"
+                  }
+                },
+                {
+                  "type": "Action.Submit",
+                  "title": "Version",
+                  "data": {
+                    "type": "button",
+                    "payload": "/version"
+                  }
+                }
+              ]
+            }
+            const choicesCard = {
+              "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+              "type": "AdaptiveCard",
+              "version": "1.5",
+              "body": [
+                {
+                  "type": "TextBlock",
+                  "size": "medium",
+                  "weight": "bolder",
+                  "text": "Card Payment Form",
+                  "horizontalAlignment": "left",
+                  "wrap": true,
+                  "style": "heading"
+                },
+                {
+                  "type": "Input.ChoiceSet",
+                  "label": "Which credit card?",
+                  "id": "entity_credit_card",
+                  "style": "compact",
+                  "isMultiSelect": false,
+                  "value": "2",
+                  "choices": [
+                    {
+                      "title": "Red",
+                      "value": "1"
+                    },
+                    {
+                      "title": "Green",
+                      "value": "2"
+                    },
+                    {
+                      "title": "Blue",
+                      "value": "3"
+                    }
+                  ]
+                }
+              ],
+              "actions": [
+                {
+                  "type": "Action.Submit",
+                  "title": "Submit",
+                  "data": {
+                    "type": "form",
+                    "payload": "/inform"
+                  }
+                }
+              ]
+            }
+            
+
+            // Parse the Adaptive Card JSON payload
+            // adaptiveCard.parse(adaptiveCardData);
+            adaptiveCard.parse(choicesCard);
+
+            // Render the card to an HTML element
+            let renderedCard = adaptiveCard.render();
+
+            // Convert the HTML element to a string using an XMLSerializer
+            // let serializer = new XMLSerializer();
+            // let renderedCardAsString = serializer.serializeToString(renderedCard);
+
+            // Append the Adaptive Card to the chat
+            // $(renderedCard).appendTo(".chats").hide().fadeIn(1000);
+            // console.log("renderedCardAsString: ", renderedCardAsString);
+            // botResponse = `<img class="botAvatar" src="./static/img/sara_avatar.png"/><p class="botMsg">Hi there</p><div class="clearfix"></div>`;
+            // $(".chats").append(botResponse);
+            // $(".chats").append(renderedCardAsString);
+            // document.getElementById('.chats').appendChild(renderedCard);
+            $(".chats").append(renderedCard);
+            scrollToBottomOfResults();
+            return;
+          }
+
           if (payload === "quickReplies") {
             // check if the custom payload type is "quickReplies"
             const quickRepliesData = response[i].custom.data;
